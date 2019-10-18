@@ -1,0 +1,19 @@
+Preparacion: escalar los datos de X para que todos los valores estén dentro de un rango similar (en este caso entre -1 a +1):
+X_sc = StandardScaler().fit_transform(X)
+
+Creamos un PCA y lo entrenamos ocn los datos escalados, con un hiperparámetro "porcentaje de varuanza cubierto por los componentes creados" = 0.9
+	X_pca = PCA(n_components = .9, random_state=RANDOM_STATE).fit(X_sc)
+Miramos la cantidad de componentes que el PCA ha generado para mantener la varianza deseada:
+	X_pca.n_components_
+Comprobamos el porcentaje de varianza cubierto por cada componente:
+	X_pca.explained_variance_ratio
+	
+Podemos, por ejemplo, pintar los dos componentes principales en un scatter, para ver como se agrupan los datos.
+	plt.scatter(X_pca[:,0],X_pca[:,0], c = Y)
+	* Y es la feature, que en este tipo de problemas (de clasificacion) suelen ser pocos valores distinto, y nos interasa hacer que al pintar, los items que tengan el mismo valor de Y se coloreen con el mismo color, y así veamos posibles clusters más facilmente.	
+	
+Clustering: Creamos y entrenamos un kmeans (implementación de sklearn del algoritmo de clustering k-means (es el más usado)).	
+num_labels = np.unique(Y).size
+df = pd.DataFrame(data = X_pca)
+kmeans = KMeans(n_clusters = num_labels) // En principio ponemos num_labels clusters, y que es lo que nos gustaría clasificar, aunque puede que luego aplicando la elbow rule, nos demos cuenta de que el numero de clusters cambia.
+kmeans.fit(df);	
