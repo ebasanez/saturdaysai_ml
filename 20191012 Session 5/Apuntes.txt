@@ -1,0 +1,6 @@
+A estudiar:
+PyTorch y Keras( Keras trabaja a más alti nivel, y es un nivel de abstraccion sobre TensorFlow)
+
+POr qué normalizar?: muchas razones, entre ellas, evitar, al ir calculando descenso de gradientes y derivando , quedarse en un mínimo local, en vez de en el mínimo global (hablamos de minimos de Loss)
+
+Pregunta: cuando te dan % de diferentes features, es una sola red o se suelen hacer una red por cada feature? Suele hacerse una red por cada conjunto de categorias.
