@@ -1,0 +1,112 @@
+Entidad principal: documento. Es distinto para cada idioma y deberemos cargarlo e inicializarlo:
+from spacy.lang.en import English
+from spacy.lang.es import Spanish
+from spacy.lang.de import German
+[...]
+
+npl = English() # o Spanish(), o German()....
+
+doc = npl("Text to be analyzed!")
+
+Se comporta como una lista:
+
+doc[1] == "to"
+doc[2:4] == "be analyzed"
+doc[-1] == "!"
+
+Cada elemento (token) tiene varios atributos utiles:
+.text == Texto del token
+.i == Posicion del token en el texto
+.label_ == Categoria del token (ORDINAL, MONEY, GPE (entidad geográfica: pais, ciudad....) ,NOUM , ORG(empresa)
+.pos_ == Elemento léxico (VERB, NOUM, DET, PRON...)
+
+Cargar un modelo preentrenado:
+Por ejemplo, este:
+en bash:
+$ python -m spacy download en_core_web_sm
+
+en python:
+import spacy
+npl = spacy.load('en_core_web_sm')
+
+Relaciones sintácticas entre elementos:
+Se pueden analizar mediante los campos de token:
+dep_ = Relacion que tienem, subordinado a otro elemento
+	nsubj = Sujeto
+	ROOT = Elemento raiz, no dependiente de otro (ej: un verbo)
+	det = Determina a otro elemento (ej: determinantes)
+	dobj = Es complemento directo
+head = Token al que se subordina en la relación (si el dep_ del elemento es ROOT, head apuntará al mismo token).
+
+
+- Matchers: para buscar tokens o cadenas de token en el texto.
+Formato:
+[{'CRITERIO_1':'VALUE_1'},{'CRITERIO_2':'VALUE_2'}]
+Ej:
+[{'TEXT': 'iPhone'}, {'TEXT': 'X'}]
+Significado. Busca un token con text = 'iPhone' seguido de otro token con text = 'X'
+Criterios:
+TEXT = coincidencia exacta. Case sensitive
+LOWER = que lowercase(text) del token sea exacto al value del matcher.
+LEMMA = Que la raiz semántica sea la misma (Ej: {'LEMMA':'buy'} matchea buying, bought....
+POS = Que el token tenga esa categoria gramatical (NOUM, VERB, DET...)
+IS_DIGIT = Que sea un número
+IS_PUNT = Que sea un signo de puntuacion
+OP = Opcional ('?' == 0 o 1 concidencias, ! == 0 coindidencias, + == 1 o más coincidencias, * == 0 o más; vamos, que es como en las regex de toda la vida...).
+REGEX = Pues eso... * Uso: {"TEXT": {"REGEX":"^loquesea'$"}}
+[...]
+* Todas las reglas en: https://spacy.io/usage/rule-based-matching
+
+Ej:
+pattern = [{'LEMMA': 'love', 'POS': 'VERB'},{'POS': 'NOUN'}]
+doc = nlp("I loved dogs but now I love cats more.")
+Matches:
+loved dogs
+love cats
+
+Utilización:
+
+Dado un nlp, creamos el matcher:
+matcher = Matcher(nlp.vocab)
+pattern = [{'TEXT': 'iPhone'}, {'TEXT': 'X'}]
+matcher.add('PATTERN_NAME', None, pattern)
+
+Invocamos el matcher sobre un documento:
+doc = nlp("New iPhone X release date leaked")
+matches = matcher(doc)
+
+El resultado es una lista de tuplas de la forma match_id, start, end
+* match_id es un hash del nombre del pattern (hash(PATTERN_NAME), en este ejemplo)
+Una forma de visualizarlo sería:
+for match_id, start, end in matches:
+	matched_span = doc[start:end]
+	print(matched_span.text + ' matches matcher ' + match_id)
+
+
+- Estructura vocab: Usada para compartir datos entre diferentes documentos. Por eficiencia, se guardan los strings hasheados.
+Ej:
+coffee_hash = nlp.vocab.strings['coffee']
+coffee_string = nlp.vocab.strings[coffee_hash]
+* Los documentos tb generan los hashes para los elementos:
+coffee_hash =  doc.vocab.strings['coffee']
+
+- Cuando pedimos a vocab directamente el texto, en vez de pedirlo a traves de su atributo strings, lo que no devuelve es un lexema:
+lexeme = nlp.vocab['coffee']
+Que tiene los siguientes atributos:
+text = Texto
+orth = valor del hash
+is_alpha = 
+* Siempre será información sin contexto (ej: no sabe si se está usando la palabra como nombre o como verbo...)
+
+- Spans: subconjuntos del texto, a los que podemos asignar etiquetas:
+my_span = Span(doc, init, end, label="MI eqtiqueta") // Similar a hacer doc[0:2], pero con atributos adicionales.
+
+
+- Similaridad (Doc.similarity(X), Span.similarity(X), Token.similarity(X); devuelve float de 0 a 1)
+Puedes comparar un doc con un token o con un span; cualquier combinacion es comparable.
+Usan vectores de palabras para la comparación. El resultado suele ser el coseno del angulo formado por los vectores de palabras de las estructuras comparadas.
+Se puede acceder al vector de un token con el atributo vector.
+
+
+
+
