@@ -19,6 +19,8 @@ Cada elemento (token) tiene varios atributos utiles:
 .i == Posicion del token en el texto
 .label_ == Categoria del token (ORDINAL, MONEY, GPE (entidad geográfica: pais, ciudad....) ,NOUM , ORG(empresa)
 .pos_ == Elemento léxico (VERB, NOUM, DET, PRON...)
+.is_alpha == Indica si el token tiene una relación subordinada otro token o no.
+.is_stop == Indica si el token es un sop word (palabras tan comunes que aportan muy poco o nada al documento. Ej: me,my, am...)
 
 Cargar un modelo preentrenado:
 Por ejemplo, este:
@@ -31,7 +33,7 @@ npl = spacy.load('en_core_web_sm')
 
 Relaciones sintácticas entre elementos:
 Se pueden analizar mediante los campos de token:
-dep_ = Relacion que tienem, subordinado a otro elemento
+dep_ = Relacion que tienen, subordinado a otro elemento
 	nsubj = Sujeto
 	ROOT = Elemento raiz, no dependiente de otro (ej: un verbo)
 	det = Determina a otro elemento (ej: determinantes)
